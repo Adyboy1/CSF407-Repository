@@ -1,0 +1,189 @@
+Vocabulary: cat, dog, mat, on, park, ran, rug, sat, the, to (10 words)
+
+=== First-order CPTs (Q3) ===
+  P(next | <START>) = {the: 1.000}
+  P(next | the) = {cat: 0.250, dog: 0.250, mat: 0.167, park: 0.167, rug: 0.167}
+  P(next | cat) = {sat: 0.667, ran: 0.333}
+  P(next | dog) = {sat: 0.667, ran: 0.333}
+  P(next | sat) = {on: 1.000}
+  P(next | ran) = {to: 1.000}
+  P(next | on) = {the: 1.000}
+  P(next | to) = {the: 1.000}
+  P(next | mat) = {<END>: 1.000}
+  P(next | rug) = {<END>: 1.000}
+  P(next | park) = {<END>: 1.000}
+
+Zero-probability transitions for the requested words (next in vocab + END):
+  after 'the': <END>, on, ran, sat, the, to
+  after 'cat': <END>, cat, dog, mat, on, park, rug, the, to
+  after 'dog': <END>, cat, dog, mat, on, park, rug, the, to
+  after 'sat': <END>, cat, dog, mat, park, ran, rug, sat, the, to
+  after 'ran': <END>, cat, dog, mat, on, park, ran, rug, sat, the
+
+=== Second-order CPTs (selected contexts) ===
+  P(next | <START> <START>) = {the: 1.000}
+  P(next | <START> the) = {cat: 0.500, dog: 0.500}
+  P(next | the cat) = {sat: 0.667, ran: 0.333}
+  P(next | the dog) = {sat: 0.667, ran: 0.333}
+  P(next | cat sat) = {on: 1.000}
+  P(next | dog ran) = {to: 1.000}
+  P(next | on the) = {mat: 0.500, rug: 0.500}
+  P(next | to the) = {park: 1.000}
+  Unseen context example:
+  P(next | cat park) = <no observed transitions>
+
+=== Normalisation tests: sum_v P(v | ctx) ===
+first-order:
+  <START>            1.000000
+  cat                1.000000
+  dog                1.000000
+  mat                1.000000
+  on                 1.000000
+  park               1.000000
+  ran                1.000000
+  rug                1.000000
+  sat                1.000000
+  the                1.000000
+  to                 1.000000
+  -> 11 contexts checked, failures: 0
+second-order:
+  <START> <START>    1.000000
+  <START> the        1.000000
+  cat ran            1.000000
+  cat sat            1.000000
+  dog ran            1.000000
+  dog sat            1.000000
+  on the             1.000000
+  ran to             1.000000
+  sat on             1.000000
+  the cat            1.000000
+  the dog            1.000000
+  the mat            1.000000
+  the park           1.000000
+  the rug            1.000000
+  to the             1.000000
+  -> 15 contexts checked, failures: 0
+Negative control (subtract 0.13 from P(cat|the)): [('the', 0.87)]
+
+=== Next-word prediction, first-order (Section 11) ===
+  P(next | the) = {cat: 0.250, dog: 0.250, mat: 0.167, park: 0.167, rug: 0.167}
+    argmax -> cat
+  P(next | cat) = {sat: 0.667, ran: 0.333}
+    argmax -> sat
+  P(next | dog) = {sat: 0.667, ran: 0.333}
+    argmax -> sat
+  P(next | sat) = {on: 1.000}
+    argmax -> on
+  P(next | ran) = {to: 1.000}
+    argmax -> to
+  P(next | on) = {the: 1.000}
+    argmax -> the
+  P(next | to) = {the: 1.000}
+    argmax -> the
+
+=== Next-word prediction, second-order ===
+  P(next | the cat) = {sat: 0.667, ran: 0.333}
+    argmax -> sat
+  P(next | the dog) = {sat: 0.667, ran: 0.333}
+    argmax -> sat
+  P(next | sat on) = {the: 1.000}
+    argmax -> the
+  P(next | on the) = {mat: 0.500, rug: 0.500}
+    argmax -> mat
+  P(next | ran to) = {the: 1.000}
+    argmax -> the
+  P(next | to the) = {park: 1.000}
+    argmax -> park
+
+=== 20 sampled sentences, first-order (seed 407) ===
+   1. the cat sat on the park  [END]
+   2. the cat sat on the rug  [END]
+   3. the cat ran to the dog sat on the park  [END]
+   4. the dog sat on the rug  [END]
+   5. the dog ran to the cat ran to the dog ran to the rug  [END]
+   6. the cat sat on the rug  [END]
+   7. the cat sat on the dog sat on the mat  [END]
+   8. the cat ran to the mat  [END]
+   9. the cat sat on the dog sat on the dog ran to the cat ran to the rug  [END]
+  10. the cat sat on the mat  [END]
+  11. the park  [END]
+  12. the rug  [END]
+  13. the cat ran to the cat sat on the mat  [END]
+  14. the mat  [END]
+  15. the rug  [END]
+  16. the rug  [END]
+  17. the dog sat on the dog ran to the park  [END]
+  18. the park  [END]
+  19. the mat  [END]
+  20. the rug  [END]
+  distinct: 14/20
+
+=== 20 sampled sentences, second-order (seed 407) ===
+   1. the cat sat on the rug  [END]
+   2. the cat sat on the rug  [END]
+   3. the cat ran to the park  [END]
+   4. the dog sat on the mat  [END]
+   5. the dog sat on the mat  [END]
+   6. the dog ran to the park  [END]
+   7. the cat sat on the mat  [END]
+   8. the cat sat on the mat  [END]
+   9. the cat sat on the rug  [END]
+  10. the dog ran to the park  [END]
+  11. the cat sat on the mat  [END]
+  12. the dog ran to the park  [END]
+  13. the cat ran to the park  [END]
+  14. the cat sat on the rug  [END]
+  15. the dog sat on the rug  [END]
+  16. the cat sat on the mat  [END]
+  17. the dog sat on the mat  [END]
+  18. the cat sat on the mat  [END]
+  19. the cat ran to the park  [END]
+  20. the cat ran to the park  [END]
+  distinct: 6/20
+
+=== Greedy vs sampling (Part X) ===
+first-order Mode A greedy 1: the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on  [MAXLEN]
+first-order Mode A greedy 2: the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on  [MAXLEN]
+first-order Mode A greedy 3: the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on  [MAXLEN]
+first-order Mode A greedy 4: the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on  [MAXLEN]
+first-order Mode A greedy 5: the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on  [MAXLEN]
+  distinct in 5 greedy runs: 1
+first-order Mode B sample 1: the rug  [END]
+first-order Mode B sample 2: the dog sat on the cat ran to the park  [END]
+first-order Mode B sample 3: the park  [END]
+first-order Mode B sample 4: the rug  [END]
+first-order Mode B sample 5: the mat  [END]
+  distinct in 5 samples: 4
+second-order Mode A greedy 1: the cat sat on the mat  [END]
+second-order Mode A greedy 2: the cat sat on the mat  [END]
+second-order Mode A greedy 3: the cat sat on the mat  [END]
+second-order Mode A greedy 4: the cat sat on the mat  [END]
+second-order Mode A greedy 5: the cat sat on the mat  [END]
+  distinct in 5 greedy runs: 1
+second-order Mode B sample 1: the dog sat on the mat  [END]
+second-order Mode B sample 2: the cat ran to the park  [END]
+second-order Mode B sample 3: the dog ran to the park  [END]
+second-order Mode B sample 4: the dog sat on the mat  [END]
+second-order Mode B sample 5: the cat ran to the park  [END]
+  distinct in 5 samples: 3
+
+=== Model comparison (Part XIII) ===
+                                             first-order  second-order
+Observed contexts (CPT rows with data)                11            15
+Non-zero parameters (context,next) pairs              17            19
+Rows in full CPT over vocabulary                      11           121
+Unobserved contexts (rows with no data)                0           106
+Zero entries inside observed rows                    104           146
+Distinct sentences in 20 samples                      14             6
+Samples identical to a training sentence               4            20
+Novel (not in training data) first-order: ['the cat ran to the cat sat on the mat', 'the cat ran to the dog sat on the park', 'the cat ran to the mat', 'the cat sat on the dog sat on the dog ran to the cat ran to the rug', 'the cat sat on the dog sat on the mat', 'the cat sat on the park', 'the dog ran to the cat ran to the dog ran to the rug', 'the dog sat on the dog ran to the park', 'the mat', 'the park', 'the rug']
+Novel (not in training data) second-order: []
+Note: the full-CPT row counts include <START> as a context word; the number of rows that can actually be reached is smaller.
+
+=== Unseen-context behaviour (Q7) ===
+m1.predict(('park',)) -> <END> (park is only followed by END)
+m1.predict(('banana',)) -> None
+first-order generate('greedy') continuing from 'banana' -> tokens ['banana'], status UNSEEN
+first-order generate('sample') continuing from 'banana' -> tokens ['banana'], status UNSEEN
+second-order generate('greedy') continuing from 'cat park' -> tokens ['cat', 'park'], status UNSEEN
+second-order generate('sample') continuing from 'cat park' -> tokens ['cat', 'park'], status UNSEEN

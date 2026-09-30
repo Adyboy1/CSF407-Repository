@@ -1,0 +1,85 @@
+=== Task 1: single affine + sigmoid (no hidden layer) ===
+final loss 0.6931 (ln2 = 0.6931)
+probs [0.5, 0.5, 0.5, 0.5] labels [0.0, 0.0, 0.0, 0.0]
+accuracy: 2/4
+
+=== Task 4A: 2-2-1 tanh network, BCEWithLogits, Adam lr=0.05, 3000 steps ===
+initial loss 0.7102  final loss 0.000108
+probabilities [0.0001, 0.9998, 0.9999, 0.0001]
+labels [0.0, 1.0, 1.0, 0.0] -> all correct: True
+
+=== Task 4B: gradient checks (tanh net at initialisation, seed 0) ===
+dL/dW1 from backward():
+ tensor([[0.0182, 0.0358],
+        [0.0170, 0.0028]])
+max |grad - mean(per-example grads)| = 0.00e+00
+finite-difference dL/dW1:
+ tensor([[0.0182, 0.0358],
+        [0.0170, 0.0028]])
+max |autograd - finite diff| = 3.51e-11  (relative to max |grad|: 9.81e-10)
+
+=== Task 4C: symmetry ===
+init = zeros
+  step    0  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step    1  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step   10  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step  100  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step 1000  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step 2999  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  final W1 = [[0.0, 0.0], [0.0, 0.0]]  loss 0.6931 probs [0.5, 0.5, 0.5, 0.5]
+init = constant0.5
+  step    0  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step    1  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step   10  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step  100  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step 1000  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  step 2999  max|W1[0]-W1[1]| = 0.000e+00  |b1[0]-b1[1]| = 0.000e+00
+  final W1 = [[-7.77308024256387, -7.77308024256387], [-7.77308024256387, -7.77308024256387]]  loss 0.4774 probs [0.0, 0.667, 0.667, 0.667]
+
+=== Task 4D: activation experiment (same seed / same init weights) ===
+sigmoid  loss 0.000284  4/4 correct: True   ||grad W1||2 at step 0 = 0.0096  probs [0.0, 1.0, 1.0, 0.0]
+tanh     loss 0.000108  4/4 correct: True   ||grad W1||2 at step 0 = 0.0437  probs [0.0, 1.0, 1.0, 0.0]
+relu     loss 0.693147  4/4 correct: False  ||grad W1||2 at step 0 = 0.0412  probs [0.5, 0.5, 0.5, 0.5]
+sigmoid  seeds 0-19: 7/20 solved XOR, mean step-0 grad norm 0.0083, mean final loss 0.2581
+tanh     seeds 0-19: 10/20 solved XOR, mean step-0 grad norm 0.0305, mean final loss 0.1799
+relu     seeds 0-19: 6/20 solved XOR, mean step-0 grad norm 0.0345, mean final loss 0.4074
+
+Diagnostic: hidden pre-activations / activations at initialisation (seed 0)
+sigmoid pre-activations:
+ tensor([[0.2051, 0.4117],
+        [0.4990, 1.0068],
+        [0.8699, 0.3543],
+        [1.1638, 0.9493]]) 
+  local derivative f'(z):
+ tensor([[0.2474, 0.2397],
+        [0.2351, 0.1960],
+        [0.2081, 0.2423],
+        [0.1813, 0.2012]])
+relu pre-activations:
+ tensor([[0.2051, 0.4117],
+        [0.4990, 1.0068],
+        [0.8699, 0.3543],
+        [1.1638, 0.9493]]) 
+  local derivative f'(z):
+ tensor([[1., 1.],
+        [1., 1.],
+        [1., 1.],
+        [1., 1.]])
+
+Diagnostic after training (seed 0): pre-activations z and fraction of active/saturated units
+sigmoid  min f'(z)=0.0000  max=0.0077
+relu  z = [[0.12785434291953318, 0.2762200713254333], [0.12105092114355491, 0.39097149276261317], [0.325219949105125, 0.04874040530001797], [0.3184165273291467, 0.1634918267371978]]  fraction of inputs with z>0 per unit: [1.0, 1.0]
+
+=== Task 5: 3-class extension (2-2-3 tanh, CrossEntropyLoss) ===
+final weight matrix shape: (3, 2)  logits per example: 3
+initial->final loss: 1.0240 -> 0.000030
+  x=[0.0, 0.0]  p=[1.0, 0.0, 0.0]  pred=0  target=0
+  x=[0.0, 1.0]  p=[0.0, 1.0, 0.0]  pred=1  target=1
+  x=[1.0, 0.0]  p=[0.0, 1.0, 0.0]  pred=1  target=1
+  x=[1.0, 1.0]  p=[0.0, 0.0, 1.0]  pred=2  target=2
+all correct: True
+softmax vector for x=[0.0, 1.0]: [1.5346118013686255e-05, 0.9999718707388711, 1.278314311531061e-05], sum = 1.000000000000
+max |dL/dlogits - (p-y)/N| = 3.39e-21   (1/N from the mean over N=4 examples)
+logits + 100 -> softmax: [1.5346118013686363e-05, 0.9999718707388711, 1.2783143115310702e-05]  max diff vs original: 1.08e-19
+naive exp on [1000,1001,1002] : [nan, nan, nan]
+subtract-max softmax          : [0.09003057317038045, 0.2447284710547976, 0.6652409557748218]

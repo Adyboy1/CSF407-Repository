@@ -1,0 +1,76 @@
+Task 0: applicability in the initial state
+  PickUp(Package,A): applicable = True
+  Drop(Package,C): applicable = False
+
+=== Test A: solvable warehouse problem ===
+Initial: {At(Package,A), At(Robot,A)}
+Goal:    {At(Package,C)}
+Actions: Move(A,B), Move(B,A), Move(B,C), Move(C,B), PickUp(Package,A), PickUp(Package,B), PickUp(Package,C), Drop(Package,A), Drop(Package,B), Drop(Package,C)
+Result: plan of length 4: PickUp(Package,A) -> Move(A,B) -> Move(B,C) -> Drop(Package,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1 after PickUp(Package,A): {At(Robot,A), Holding(Package)}
+  S2 after Move(A,B): {At(Robot,B), Holding(Package)}
+  S3 after Move(B,C): {At(Robot,C), Holding(Package)}
+  S4 after Drop(Package,C): {At(Package,C), At(Robot,C)}
+  [validator] step 1 PickUp(Package,A): preconditions OK
+  [validator] step 2 Move(A,B): preconditions OK
+  [validator] step 3 Move(B,C): preconditions OK
+  [validator] step 4 Drop(Package,C): preconditions OK
+  [validator] goal satisfied
+Plan valid: True
+
+=== Test B: impossible (PickUp removed) ===
+Initial: {At(Package,A), At(Robot,A)}
+Goal:    {At(Package,C)}
+Actions: Move(A,B), Move(B,A), Move(B,C), Move(C,B), Drop(Package,A), Drop(Package,B), Drop(Package,C)
+Result: No plan found
+
+=== Test C1: only Moves available, goal At(Package,C) ===
+Initial: {At(Package,A), At(Robot,A)}
+Goal:    {At(Package,C)}
+Actions: Move(A,B), Move(B,A), Move(B,C), Move(C,B)
+Result: No plan found
+
+=== Test C2: only Moves available, goal At(Robot,C) ===
+Initial: {At(Package,A), At(Robot,A)}
+Goal:    {At(Robot,C)}
+Actions: Move(A,B), Move(B,A), Move(B,C), Move(C,B)
+Result: plan of length 2: Move(A,B) -> Move(B,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1 after Move(A,B): {At(Package,A), At(Robot,B)}
+  S2 after Move(B,C): {At(Package,A), At(Robot,C)}
+  [validator] step 1 Move(A,B): preconditions OK
+  [validator] step 2 Move(B,C): preconditions OK
+  [validator] goal satisfied
+Plan valid: True
+
+=== Test C3: extra robot-only shortcut action added, goal At(Package,C) ===
+Initial: {At(Package,A), At(Robot,A)}
+Goal:    {At(Package,C)}
+Actions: Move(A,B), Move(B,A), Move(B,C), Move(C,B), PickUp(Package,A), PickUp(Package,B), PickUp(Package,C), Drop(Package,A), Drop(Package,B), Drop(Package,C), Teleport(Robot,A,C)
+Result: plan of length 3: PickUp(Package,A) -> Teleport(Robot,A,C) -> Drop(Package,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1 after PickUp(Package,A): {At(Robot,A), Holding(Package)}
+  S2 after Teleport(Robot,A,C): {At(Robot,C), Holding(Package)}
+  S3 after Drop(Package,C): {At(Package,C), At(Robot,C)}
+  [validator] step 1 PickUp(Package,A): preconditions OK
+  [validator] step 2 Teleport(Robot,A,C): preconditions OK
+  [validator] step 3 Drop(Package,C): preconditions OK
+  [validator] goal satisfied
+Plan valid: True
+
+=== Extra: validator rejects an invalid plan ===
+  [validator] step 1 Move(A,B): preconditions OK
+  [validator] step 2 Move(B,C): preconditions OK
+  [validator] step 3 Drop(Package,C): INVALID (missing ['Holding(Package)'], forbidden-but-present [])
+Extra: 'looks reasonable' plan rejected -> True
+
+=== Extra: negative precondition blocks an action ===
+  State: {At(Package,A), At(Robot,A), Holding(Package)}
+  PickUp(Package,A): positive preconditions hold = True, applicable = False
+  [validator] step 1 PickUp(Package,A): INVALID (missing [], forbidden-but-present ['Holding(Package)'])
+
+=== Extra: goal already satisfied ===
+  plan length: 0
+
+All tests passed.
